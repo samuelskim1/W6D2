@@ -5,18 +5,32 @@ require 'active_support/inflector'
 
 class SQLObject
   def self.columns
-    # ...
+    
+    if @columns == nil
+      holder = DBConnection.execute2(<<-SQL)
+            SELECT
+              *
+            FROM
+              #{self.table_name}
+          SQL
+
+      column_names = holder[0]
+      @columns = column_names.map! {|column_name| column_name.to_sym}
+    end
+
+    @columns
   end
 
   def self.finalize!
   end
 
   def self.table_name=(table_name)
-    # ...
+    @table_name = table_name
   end
 
   def self.table_name
-    # ...
+    @table_name ||= self.to_s.tableize
+    @table_name
   end
 
   def self.all
